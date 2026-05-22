@@ -25,37 +25,94 @@
   sections.forEach(s => observer.observe(s));
 })();
 
-// Background music — autoplay on first interaction + floating toggle
+// Background music — inline player + floating toggle, synced
 (function() {
   const audio = document.getElementById('bgm');
-  const btn = document.getElementById('music-toggle');
-  if (!audio || !btn) return;
+  if (!audio) return;
+
+  const fab = document.getElementById('music-toggle');
+  const player = document.getElementById('music-player');
+  const playBtn = document.getElementById('mp-btn');
+  const trackEl = document.getElementById('mp-track');
+  const fillEl = document.getElementById('mp-fill');
+  const thumbEl = document.getElementById('mp-thumb');
+  const timeEl = document.getElementById('mp-time');
 
   audio.volume = 0.35; // gentle background level
 
+  function fmt(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // Sync the play/pause visual state across both controls
   function reflect() {
-    if (audio.paused) {
-      btn.classList.add('paused');
-      btn.classList.remove('playing');
-      btn.title = '播放背景音乐';
-    } else {
-      btn.classList.add('playing');
-      btn.classList.remove('paused');
-      btn.title = '暂停背景音乐';
+    const playing = !audio.paused;
+    if (player) player.classList.toggle('playing', playing);
+    if (fab) {
+      fab.classList.toggle('playing', playing);
+      fab.classList.toggle('paused', !playing);
+      fab.title = playing ? '暂停背景音乐' : '播放背景音乐';
     }
   }
+
+  // Update the progress bar + time readout
+  function updateProgress() {
+    const dur = audio.duration || 0;
+    const pct = dur ? (audio.currentTime / dur) * 100 : 0;
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (thumbEl) thumbEl.style.left = pct + '%';
+    if (timeEl) timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(dur);
+    if (trackEl) trackEl.setAttribute('aria-valuenow', Math.round(pct));
+  }
+
   audio.addEventListener('play', reflect);
   audio.addEventListener('pause', reflect);
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('loadedmetadata', updateProgress);
+  audio.addEventListener('durationchange', updateProgress);
 
-  // Manual toggle via the floating button
-  btn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    if (audio.paused) {
-      audio.play().catch(function() {});
-    } else {
-      audio.pause();
+  // Play/pause toggle — shared by inline button and floating button
+  function toggle(e) {
+    if (e) e.stopPropagation();
+    if (audio.paused) audio.play().catch(function() {});
+    else audio.pause();
+  }
+  if (playBtn) playBtn.addEventListener('click', toggle);
+  if (fab) fab.addEventListener('click', toggle);
+
+  // Seek by clicking or dragging the progress track
+  if (trackEl) {
+    let dragging = false;
+    function seek(e) {
+      const rect = trackEl.getBoundingClientRect();
+      const x = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      let ratio = (x - rect.left) / rect.width;
+      ratio = Math.max(0, Math.min(1, ratio));
+      if (audio.duration) audio.currentTime = ratio * audio.duration;
+      updateProgress();
     }
-  });
+    trackEl.addEventListener('mousedown', function(e) {
+      dragging = true; seek(e); e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (dragging) seek(e);
+    });
+    document.addEventListener('mouseup', function() { dragging = false; });
+    trackEl.addEventListener('touchstart', seek, { passive: true });
+    trackEl.addEventListener('touchmove', seek, { passive: true });
+    // Keyboard seeking (arrow keys) for accessibility
+    trackEl.addEventListener('keydown', function(e) {
+      if (!audio.duration) return;
+      if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); }
+      else if (e.key === 'ArrowLeft') { audio.currentTime = Math.max(0, audio.currentTime - 5); }
+      else return;
+      e.preventDefault();
+      updateProgress();
+    });
+  }
 
   // Browsers block autoplay until a user gesture — start on first interaction
   const gestures = ['click', 'scroll', 'keydown', 'touchstart'];
@@ -67,8 +124,9 @@
     document.addEventListener(ev, autoStart, { passive: true });
   });
 
-  // Optimistic attempt — most browsers will block this, which is fine
+  // Optimistic attempt — most browsers will block this until a gesture
   audio.play().catch(function() {});
 
   reflect();
+  updateProgress();
 })();
