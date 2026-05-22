@@ -740,6 +740,100 @@ tbody td:first-child {
 .sidebar::-webkit-scrollbar-thumb { background: rgba(52, 152, 219, 0.25); border-radius: 3px; }
 .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(52, 152, 219, 0.5); }
 
+/* ========= Entry overlay (click-to-enter cover) ========= */
+.enter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  cursor: pointer;
+  background: radial-gradient(ellipse at 50% 38%, #2c5fa8 0%, #1a4480 56%, #112c57 100%);
+  transition: opacity 0.55s ease, visibility 0.55s ease;
+}
+.enter-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.enter-card {
+  text-align: center;
+  max-width: 660px;
+  color: #fff;
+  animation: enter-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes enter-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.enter-eyebrow {
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 22px;
+}
+.enter-name {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  margin-bottom: 14px;
+}
+.enter-sub {
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.86);
+  max-width: 520px;
+  margin: 0 auto 22px;
+}
+.enter-date {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 34px;
+}
+.enter-btn {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue-deep);
+  background: #fff;
+  border: none;
+  border-radius: 40px;
+  padding: 13px 38px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  animation: enter-btn-pulse 2.6s ease-in-out infinite;
+}
+.enter-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+}
+.enter-btn-ico { font-size: 11px; }
+@keyframes enter-btn-pulse {
+  0%, 100% { box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32); }
+  50%      { box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32), 0 0 0 11px rgba(255, 255, 255, 0.08); }
+}
+.enter-hint {
+  margin-top: 20px;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.5);
+}
+@media (max-width: 600px) {
+  .enter-name { font-size: 25px; }
+  .enter-sub { font-size: 14.5px; }
+  .enter-btn { font-size: 15px; padding: 12px 30px; }
+}
+@media print { .enter-overlay { display: none !important; } }
+
 /* ========= Print (carries through for the print-version file) ========= */
 @media print {
   body { background: #fff; }

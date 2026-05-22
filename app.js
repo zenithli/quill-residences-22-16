@@ -114,6 +114,26 @@
     });
   }
 
+  // Entry overlay — the click that enters the report also starts the music
+  // (a user gesture, so playback is permitted by the browser autoplay policy)
+  const overlay = document.getElementById('enter-overlay');
+  if (overlay) {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    let entered = false;
+    function enterReport() {
+      if (entered) return;
+      entered = true;
+      overlay.classList.add('hidden');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      audio.play().catch(function() {});
+      setTimeout(function() { overlay.style.display = 'none'; }, 650);
+    }
+    overlay.addEventListener('click', enterReport);
+    overlay.addEventListener('keydown', enterReport);
+  }
+
   // Browsers block autoplay until a user gesture — start on first interaction
   const gestures = ['click', 'scroll', 'keydown', 'touchstart'];
   function autoStart() {
