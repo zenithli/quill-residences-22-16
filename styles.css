@@ -605,6 +605,52 @@ tbody td:first-child {
 }
 @media print { .back-to-top { display: none; } }
 
+/* ========= Background music button ========= */
+.music-toggle {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(26, 68, 128, 0.3);
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 999;
+  opacity: 0.85;
+}
+.music-toggle:hover {
+  opacity: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(26, 68, 128, 0.4);
+}
+.music-toggle.paused {
+  opacity: 0.55;
+}
+.music-toggle.paused:hover {
+  opacity: 0.9;
+}
+.music-icon {
+  font-size: 19px;
+  line-height: 1;
+  display: block;
+}
+.music-toggle.playing .music-icon {
+  animation: music-pulse 1.6s ease-in-out infinite;
+}
+@keyframes music-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+@media print { .music-toggle { display: none; } }
+
 /* Scrollbar */
 .sidebar::-webkit-scrollbar { width: 5px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
